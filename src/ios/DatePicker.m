@@ -24,6 +24,8 @@
 @property (nonatomic) IBOutlet UIButton *cancelButton;
 @property (nonatomic) IBOutlet UIButton *doneButton;
 @property (nonatomic) IBOutlet UIDatePicker *datePicker;
+@property (nonatomic) float backgroundAlpha1;
+@property (nonatomic) float backgroundAlpha2;
 
 @end
 
@@ -51,7 +53,11 @@
   [self updateDatePicker:options];
   [self updateCancelButton:options];
   [self updateDoneButton:options];
-  
+
+    // ALSO ADD DATE CHANGED HANDLING TO PHONE!
+    [self.datePicker addTarget:self action:@selector(dateChangedAction:) forControlEvents:UIControlEventValueChanged];
+    
+    
   UIDeviceOrientation deviceOrientation = [UIDevice currentDevice].orientation;
   
   CGFloat width;
@@ -76,14 +82,14 @@
                                                           frame.size.height );
   
   
-  self.datePickerContainer.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0];
+  self.datePickerContainer.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:_backgroundAlpha1];
   
   [UIView animateWithDuration:ANIMATION_DURATION
                         delay:0
                       options:UIViewAnimationOptionCurveEaseOut
                    animations:^{
     self.datePickerComponentsContainer.frame = frame;
-    self.datePickerContainer.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.4];
+    self.datePickerContainer.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:_backgroundAlpha2];
 
   } completion:^(BOOL finished) {
     
@@ -121,34 +127,42 @@
 
 #pragma mark - Actions
 - (IBAction)doneAction:(id)sender {
-  [self jsDateSelected];
-  [self hide];
+    [self jsDateSelected];
+    [self hide];
 }
-  
+
 - (IBAction)cancelAction:(id)sender {
-  [self jsCancel];
-  [self hide];
+    [self jsCancel];
+    [self hide];
 }
 
 
 - (void)dateChangedAction:(id)sender {
-  [self jsDateSelected];
+    [self jsDateChanged];
 }
 
 #pragma mark - JS API
 
-- (void)jsCancel {
-  NSLog(@"JS Cancel is going to be executed");
-  NSString* jsCallback = [NSString stringWithFormat:@"datePicker._dateSelectionCanceled();"];
-  [super writeJavascript:jsCallback];
+- (void)jsDateSelected {
+    NSTimeInterval seconds = [self.datePicker.date timeIntervalSince1970];
+    NSString* jsCallback = [NSString stringWithFormat:@"datePicker._dateSelected(\"%f\");", seconds];
+    //NSLog(jsCallback);
+    [super writeJavascript:jsCallback];
 }
 
-- (void)jsDateSelected {
-  NSTimeInterval seconds = [self.datePicker.date timeIntervalSince1970];
-  NSString* jsCallback = [NSString stringWithFormat:@"datePicker._dateSelected(\"%f\");", seconds];
-  //NSLog(jsCallback);
-  [super writeJavascript:jsCallback];
+- (void)jsCancel {
+    NSLog(@"JS Cancel is going to be executed");
+    NSString* jsCallback = [NSString stringWithFormat:@"datePicker._dateSelectionCanceled();"];
+    [super writeJavascript:jsCallback];
 }
+
+- (void)jsDateChanged {
+    NSTimeInterval seconds = [self.datePicker.date timeIntervalSince1970];
+    NSString* jsCallback = [NSString stringWithFormat:@"datePicker._dateChanged(\"%f\");", seconds];
+    //NSLog(jsCallback);
+    [super writeJavascript:jsCallback];
+}
+
 
 
 #pragma mark - UIPopoverControllerDelegate methods

@@ -25,12 +25,25 @@ phonegap local plugin add https://github.com/VitaliiBlagodir/cordova-plugin-date
 ```js
 var options = {
   date: new Date(),
-  mode: 'date'
+  mode: 'date',
+  backgroundAlpha1: 0,  // alpha at start of animation (bringing up the date picker)
+  backgroundAlpha1: 0.8 // alpha at end of animation
 };
 
 datePicker.show(options, function(date){
   alert("date result " + date);  
 });
+
+datePicker._dateChanged = function(timeIntervalSince1970) {
+    alert("_dateChanged:timeIntervalSince1970="+timeIntervalSince1970);
+}
+datePicker._dateSelectionCanceled = function() {
+    alert("_dateSelectionCanceled");
+}
+datePicker._dateSelected = function(timeIntervalSince1970) {
+    alert("_dateSelected:timeIntervalSince1970="+timeIntervalSince1970);
+}
+
 ```
 
 ## Options
